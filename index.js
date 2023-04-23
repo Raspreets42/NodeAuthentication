@@ -3,16 +3,22 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-
 const connectDB = require("./db/connect");
-
 const bcrypt = require("bcrypt");
 const User = require("./model/schema");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
+require('./routes/auth.routes')(app);
+
 app.use(cors({ origin: "*" }));
+
+var corsOptions = {
+  origin: "http://localhost:4200"
+};
+
+app.use(cors(corsOptions));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -70,47 +76,47 @@ app.post("/api/login", async (req, res) => {
   res.status(404).json({ status: false, msg: "Invalid User email or/and password" });
 }); 
 
-app.post("/api/register", async (req, res) => {
-  const { userName, userEmail, userPhone, userPassword, userCPassword } =
-    req.body;
+// app.post("/api/register", async (req, res) => {
+//   const { userName, userEmail, userPhone, userPassword, userCPassword } =
+//     req.body;
 
-  if (
-    userName === "" ||
-    userEmail === "" ||
-    userPhone === "" ||
-    userPassword === "" ||
-    userCPassword === ""
-  ) {
-    res.status(404).json({
-      status: 500,
-      msg: "Please fill all the required fields",
-    });
-    return;
-  } else if (userPassword !== userCPassword) {
-    res.status(404).json({
-      status: 401,
-      msg: "Password does not matches",
-    });
-    return;
-  }
+//   if (
+//     userName === "" ||
+//     userEmail === "" ||
+//     userPhone === "" ||
+//     userPassword === "" ||
+//     userCPassword === ""
+//   ) {
+//     res.status(404).json({
+//       status: 500,
+//       msg: "Please fill all the required fields",
+//     });
+//     return;
+//   } else if (userPassword !== userCPassword) {
+//     res.status(404).json({
+//       status: 401,
+//       msg: "Password does not matches",
+//     });
+//     return;
+//   }
 
-  const userHashedPassword = await bcrypt.hash(userPassword, 10);
-  const userHashedCPassword = await bcrypt.hash(userCPassword, 10);
+//   const userHashedPassword = await bcrypt.hash(userPassword, 10);
+//   const userHashedCPassword = await bcrypt.hash(userCPassword, 10);
 
-  try {
-    const resp = await User.create({
-      userName,
-      userEmail,
-      userPhone,
-      userPassword: userHashedPassword,
-      userCPassword: userHashedCPassword,
-    });
-    console.log("resp : ", resp);
-    res.status(2000).json({ status: true, msg: "Successfully Registered" });
-  } catch (err) {
-    res.status(404).json({ status: false, msg: err.message });
-  }
-});
+//   try {
+//     const resp = await User.create({
+//       userName,
+//       userEmail,
+//       userPhone,
+//       userPassword: userHashedPassword,
+//       userCPassword: userHashedCPassword,
+//     });
+//     console.log("resp : ", resp);
+//     res.status(2000).json({ status: true, msg: "Successfully Registered" });
+//   } catch (err) {
+//     res.status(404).json({ status: false, msg: err.message });
+//   }
+// });
 
 const start = async () => {
   try {
